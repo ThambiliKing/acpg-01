@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import path from "path";
 import bodyParser from "body-parser";
-import config from "./config.json" assert { type: "json" };
+import config from "./config" assert { type: "json" };
 
 const app = express();
 
