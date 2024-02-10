@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+
+    <script src="https://kit.fontawesome.com/7b71993087.js" crossorigin="anonymous"></script>
+
+    <style>
+      .clickable-row {
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar" style="background-color: #e3f2fd;">
+      <div class="container-fluid">
+        <a class="navbar-brand">Student Management</a>
+        <form class="d-flex" action="/logout" method="GET">
+          <button class="btn btn-primary" type="submit">Logout</button>
+        </form>
+      </div>
+    </nav><br>
+    <center><h1>Admin Dashboard</h1></center>
+    <div class="alert-system">
+    <div class="alert alert-info d-flex align-items-center justify-content-center m-0" role="alert">
+      <i class="fa-solid fa-circle-info"></i>&nbsp;&nbsp;Beta Testing Environment. v1.0.3
+    </div>
+    </div>
+    <br /><br />
+    </div>
+
+    <center>
+      <button class="btn btn-primary" id="addStudentButton">
+        Add New Student
+      </button>
+    </center>
+    <br /><br />
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 offset-md-8">
+          <label for="studentSearch">Search for Students:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="studentSearch"
+            placeholder="Search by Name"
+          />
+        </div>
+      </div>
+    </div>
+    <br />
+
+    <div class="table-responsive">
+      <table class="table table-bordered border-primary table-hover">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Admission</th>
+            <th scope="col">Class</th>
+            <th scope="col"><center>Actions</center></th>
+          </tr>
+        </thead>
+        <tbody class="table-group-divider" id="studentTableBody">
+        </tbody>
+      </table>
+    </div>
+
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center" id="pagination"></ul>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .getElementById("addStudentButton")
+          .addEventListener("click", function (event) {
+            Swal.fire({
+              title: "Enter Student Details",
+              html:
+                '<input id="addname" class="swal2-input" placeholder="Name" required>' +
+                '<input id="admission_no" class="swal2-input" placeholder="Admission Number">' +
+                '<input id="student_class" class="swal2-input" placeholder="Student Class" required>' +
+                '<input id="year" class="swal2-input" placeholder="Year" value="2023" disabled>' +
+                '<div id="reasonsDiv">' +
+                '<br><br><button id="addReasonButton"class="btn btn-primary">Add Reason</button><br><br>' +
+                "</div>",
+              showCancelButton: true,
+              confirmButtonText: "Submit",
+              preConfirm: () => {
+                const name = document.getElementById("addname").value;
+                const admission_no =
+                  document.getElementById("admission_no").value;
+                const student_class =
+                  document.getElementById("student_class").value;
+                const year = document.getElementById("year").value;
+                const reasonInputs = document.querySelectorAll(".reason");
+
+                const reasons_data = Array.from(reasonInputs)
+                  .map((reasonInput) => reasonInput.value)
+                  .filter((reason) => reason.trim() !== "");
+
+                const reasons = reasons_data.map((data) => {
+                  return {
+                    name: data,
+                    resolved: false,
+                    captured_date: new Date()
+                  };
+                });
+
+                const data = {
+                  name,
+                  admission_no,
+                  student_class,
+                  year,
+                  reasons,
+                };
+
+                return fetch("/api", {
+                  method: "POST",
+                  body: JSON.stringify(data),
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                }).then((response) => {
+                  if (response.ok) {
+                    Swal.fire(
+                      "Success",
+                      "Student details added successfully!",
+                      "success"
+                    );
+                    window.location.reload();
+                  } else {
+                    Swal.fire(
+                      "Error",
+                      "Failed to add student details.",
+                      "error"
+                    );
+                  }
+                });
+              },
+            });
+
+const addReasonButton = document.getElementById("addReasonButton");
+  const reasonsDiv = document.getElementById("reasonsDiv");
+
+  addReasonButton.addEventListener("click", () => {
+    const select = document.createElement("select");
+    select.className = "form-select reason";
+
+    const hairOption = document.createElement("option");
+    hairOption.text = "Hair";
+    hairOption.value = "Hair";
+
+    const moustacheOption = document.createElement("option");
+    moustacheOption.text = "Moustache";
+    moustacheOption.value = "Moustache";
+
+    const electronicsOption = document.createElement("option");
+    electronicsOption.text = "Electronics";
+    electronicsOption.value = "Electronics";
+
+    const latecomersOption = document.createElement("option");
+    latecomersOption.text = "Late Comers";
+    latecomersOption.value = "Late Comers";
+
+    const lonesleevesOption = document.createElement("option");
+    lonesleevesOption.text = "Long Sleeves";
+    lonesleevesOption.value = "Long Sleeves";
+
+    const othersOptions = document.createElement("option");
+    othersOptions.text = "Others";
+    othersOptions.value = "Others";
+
+    select.appendChild(hairOption);
+    select.appendChild(moustacheOption);
+    select.appendChild(electronicsOption);
+    select.appendChild(latecomersOption);
+    select.appendChild(lonesleevesOption);
+    select.appendChild(othersOptions);
+
+    const removeReasonButton = document.createElement("button");
+    removeReasonButton.innerText = "Remove";
+    removeReasonButton.className = "btn btn-danger";
+
+    reasonsDiv.appendChild(select);
+    reasonsDiv.appendChild(removeReasonButton);
+
+    removeReasonButton.addEventListener("click", () => {
+      reasonsDiv.removeChild(select);
+      reasonsDiv.removeChild(removeReasonButton);
+    });
+  });
+          });
+
+        fetch("/api/students", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => {
+            if (response.status == 200) {
+              return response.json();
+            } else {
+              throw new Error("Request failed with status " + response.status);
+            }
+          })
+          .then((data) => {
+            let paginationData = data.data.students;
+
+            const itemsPerPage = 10;
+            let currentPage = 1;
+            let index = 1;
+
+            function updateTable(filteredData) {
+              const tableBody = document.getElementById("studentTableBody");
+              tableBody.innerHTML = "";
+
+              const startIndex = (currentPage - 1) * itemsPerPage;
+              const endIndex = Math.min(
+                startIndex + itemsPerPage,
+                filteredData.length
+              );
+
+              for (let i = startIndex; i < endIndex; i++) {
+                const student = filteredData[i];
+                const row = `
+              <tr class="clickable-row">
+                <th scope="row">${i + 1}</th>
+                <td>${student.name}</td>
+                <td>${student.admission_no}</td>
+                <td>${student.student_class}</td>
+                <td colspan="2">
+        <center><button class="btn btn-primary add-reason-button" data-index="${i}">Add</button></center>
+      </td>
+              </tr>`;
+                tableBody.innerHTML += row;
+              }
+
+              tableBody.addEventListener("click", (event) => {
+                const target = event.target;
+
+                if (target.classList.contains("delete-button")) {
+                  const dataIndex = target.getAttribute("data-index");
+                  const student = filteredData[dataIndex];
+                  handleDeleteClick(student._id);
+                  console.log(student._id);
+                }
+
+                if (target.classList.contains("add-reason-button")) {
+                  const dataIndex = target.getAttribute("data-index");
+                  const student = filteredData[dataIndex];
+                  handleAddReasonClick(student._id);
+                }
+              });
+
+              function handleDeleteClick(studentId) {
+                Swal.fire({
+                  title: "Confirm Delete",
+                  text: "Are you sure you want to delete this student?",
+                  icon: "warning",
+                  showCancelButton: true,
+                  confirmButtonColor: "#d33",
+                  cancelButtonColor: "#3085d6",
+                  confirmButtonText: "Yes, delete it!",
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    return fetch(`/api/${studentId}`, {
+                      method: "DELETE",
+                    })
+                      .then((response) => {
+                        if (response.ok) {
+                          Swal.fire(
+                            "Deleted!",
+                            "The student has been deleted.",
+                            "success"
+                          );
+
+                          window.location.reload();
+                        } else {
+                          Swal.fire(
+                            "Error",
+                            "Failed to delete student.",
+                            "error"
+                          );
+                        }
+                      })
+                      .catch((error) => {
+                        console.error("Error:", error);
+                      });
+                  }
+                });
+              }
+
+              function handleAddReasonClick(studentId) {
+                Swal.fire({
+                  title: "Add new Reason",
+                  html:
+                    '<div id="reasonsDiv2">' +
+                    '<br><br><button id="addReasonButton2"class="btn btn-primary">Add Reason</button>' +
+                    "</div>",
+                  showCancelButton: true,
+                  confirmButtonText: "Submit",
+                  willOpen: () => {
+                    const addReasonButton = document.getElementById("addReasonButton2");
+  const reasonsDiv = document.getElementById("reasonsDiv2");
+
+  addReasonButton.addEventListener("click", () => {
+    const select = document.createElement("select");
+    select.className = "form-select reason2";
+
+    const hairOption = document.createElement("option");
+    hairOption.text = "Hair";
+    hairOption.value = "Hair";
+
+    const moustacheOption = document.createElement("option");
+    moustacheOption.text = "Moustache";
+    moustacheOption.value = "Moustache";
+
+    const electronicsOption = document.createElement("option");
+    electronicsOption.text = "Electronics";
+    electronicsOption.value = "Electronics";
+
+    const latecomersOption = document.createElement("option");
+    latecomersOption.text = "Late Comers";
+    latecomersOption.value = "Late Comers";
+
+    const lonesleevesOption = document.createElement("option");
+    lonesleevesOption.text = "Long Sleeves";
+    lonesleevesOption.value = "Long Sleeves";
+
+    const othersOptions = document.createElement("option");
+    othersOptions.text = "Others";
+    othersOptions.value = "Others";
+
+    select.appendChild(hairOption);
+    select.appendChild(moustacheOption);
+    select.appendChild(electronicsOption);
+    select.appendChild(latecomersOption);
+    select.appendChild(lonesleevesOption);
+    select.appendChild(othersOptions);
+
+    const removeReasonButton = document.createElement("button");
+    removeReasonButton.innerText = "Remove";
+    removeReasonButton.className = "btn btn-danger";
+
+    reasonsDiv.appendChild(select);
+    reasonsDiv.appendChild(removeReasonButton);
+
+    removeReasonButton.addEventListener("click", () => {
+      reasonsDiv.removeChild(select);
+      reasonsDiv.removeChild(removeReasonButton);
+    });
+  });
+                  },
+                  preConfirm: () => {
+                    const reasonInputs = document.querySelectorAll(".reason2");
+
+                    const reasons_data = Array.from(reasonInputs)
+                      .map((reasonInput) => reasonInput.value)
+                      .filter((reason) => reason.trim() !== "");
+
+                    const reasons = reasons_data.map((data) => {
+                      return {
+                        name: data,
+                        resolved: false,
+                        captured_date: new Date()
+                      };
+                    });
+
+                    console.log(reasons_data);
+
+                    const data = reasons;
+
+                    return fetch(`/api/student/${studentId}`, {
+                      method: "PUT",
+                      body: JSON.stringify(data),
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                    }).then((response) => {
+                      if (response.ok) {
+                        Swal.fire(
+                          "Success",
+                          "Added reason(s) successfully",
+                          "success"
+                        );
+                        window.location.reload();
+                      } else {
+                        Swal.fire(
+                          "Error",
+                          "Failed to add reason(s) details.",
+                          "error"
+                        );
+                      }
+                    });
+                  },
+                });
+              }
+
+              const clickableRows = document.querySelectorAll(".clickable-row");
+              let manipulateData = data;
+
+              clickableRows.forEach(function (row, index) {
+                row.addEventListener("click", function (event) {
+                  if (!event.target.classList.contains("btn")) {
+                    const studentData = filteredData[startIndex + index];
+                    console.log(studentData);
+
+                    const reasons = studentData ? studentData.reasons : [];
+
+                    Swal.fire({
+                      title: "Student Profile",
+                      html:
+                        `<input id="name" class="swal2-input" placeholder="Name" value="${
+                          studentData ? studentData.name : ""
+                        }">` +
+                        `<input id="admissionNumber" class="swal2-input" placeholder="Admission Number" value="${
+                          studentData ? studentData.admission_no : ""
+                        }">` +
+                        `<input id="studentClass" class="swal2-input" placeholder="Student Class" value="${
+                          studentData ? studentData.student_class : ""
+                        }">` +
+                        `<input id="year" class="swal2-input" placeholder="Year" value="${
+                          studentData ? studentData.year : ""
+                        }">` +
+                        `<div id="reasonsDiv">` +
+                        `${reasons
+                          .map(
+                            (reason, i) => `
+              <div class="reason">
+                <input class="swal2-input" placeholder="Reason" value="${
+                  reason.name
+                } - ${new Date(reason.captured_date).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}" readOnly>
+                ${
+                  reason.resolved
+                    ? `<button class="resolve-button btn btn-success" data-index="${reason._id}" data-name="${reason.name}" disabled>Resolved</button>`
+                    : `<button class="resolve-button btn btn-primary" data-index="${reason._id}" data-name="${reason.name}">Resolve</button>`
+                }
+              </div>`
+                          )
+                          .join("")}` +
+                        `</div>`,
+                      showCancelButton: true,
+                      confirmButtonText: "Save",
+                      preConfirm: () => {
+                        const name = document.getElementById("name").value;
+                        const admission_no =
+                          document.getElementById("admissionNumber").value;
+                        const student_class =
+                          document.getElementById("studentClass").value;
+                        const year = document.getElementById("year").value;
+
+                        const data = {
+                          name,
+                          admission_no,
+                          student_class,
+                          year,
+                        };
+
+                        return fetch(`/api/${studentData._id}`, {
+                          method: "PUT",
+                          body: JSON.stringify(data),
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                        }).then((response) => {
+                          if (response.ok) {
+                            Swal.fire(
+                              "Success",
+                              "Student details saved successfully!",
+                              "success"
+                            );
+                            window.location.reload();
+                          } else {
+                            Swal.fire(
+                              "Error",
+                              "Failed to save student details.",
+                              "error"
+                            );
+                          }
+                        });
+                      },
+                    });
+
+                    document
+                      .querySelectorAll(".resolve-button")
+                      .forEach((resolveButton) => {
+                        resolveButton.addEventListener("click", function () {
+                          const reasonIndex = this.getAttribute("data-index");
+                          const reasonName = this.getAttribute("data-name");
+                          const studentId = studentData._id;
+                          const resolveData = {
+                            reasons: [{ name: reasonName, resolved: true }],
+                          };
+
+                          fetch(`/api/resolve/${studentId}/${reasonIndex}`, {
+                            method: "PUT",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(resolveData),
+                          }).then((response) => {
+                            if (response.ok) {
+                              Swal.fire(
+                                "Success",
+                                "Student issue resolved successfully!",
+                                "success"
+                              );
+                              window.location.reload();
+                            } else {
+                              console.error(
+                                "Failed to resolve reason:",
+                                response.status
+                              );
+                            }
+                          });
+                        });
+                      });
+                  }
+                });
+              });
+            }
+
+            function updatePagination(filteredData) {
+              const pageCount = Math.ceil(filteredData.length / itemsPerPage);
+              const pagination = document.getElementById("pagination");
+              pagination.innerHTML = "";
+
+              const maxPagesToShow = 5; // Adjust this value to change the number of pages displayed at once
+              const halfMaxPages = Math.floor(maxPagesToShow / 2);
+
+              const startPage = Math.max(1, currentPage - halfMaxPages);
+              const endPage = Math.min(startPage + maxPagesToShow - 1, pageCount);
+
+              // Add 'Previous' button
+              if (startPage > 1) {
+                addPageLink(pagination, currentPage - 1, "Previous");
+              }
+
+              // Add page numbers with ellipsis
+              for (let i = startPage; i <= endPage; i++) {
+                addPageLink(pagination, i, i.toString(), i === currentPage);
+              }
+
+              // Add 'Next' button
+              if (endPage < pageCount) {
+                addPageLink(pagination, currentPage + 1, "Next");
+              }
+            }
+
+            function addPageLink(container, page, text, isActive = false) {
+              const li = document.createElement("li");
+              li.classList.add("page-item", isActive ? "active" : null);
+
+              const link = document.createElement("a");
+              link.classList.add("page-link");
+              link.href = "#";
+              link.textContent = text;
+
+              li.appendChild(link);
+              container.appendChild(li);
+
+              if (!isActive) {
+                link.addEventListener("click", (event) => {
+                  event.preventDefault();
+                  currentPage = page;
+                  updateTable(paginationData);
+                  updatePagination(paginationData);
+                });
+              }
+            }
+
+            function filterStudentsByName(searchValue) {
+              return paginationData.filter((student) =>
+                student.name.toLowerCase().includes(searchValue.toLowerCase())
+              );
+            }
+
+            const studentSearchInput = document.getElementById("studentSearch");
+            const addNewStudentButton = document.getElementById("addStudentButton");
+            studentSearchInput.addEventListener("input", () => {
+              const searchValue = studentSearchInput.value.trim();
+              const filteredData = searchValue
+                ? filterStudentsByName(searchValue)
+                : paginationData;
+
+              currentPage = 1;
+              updateTable(filteredData);
+              updatePagination(filteredData);
+
+                            if (filteredData.length === 0 && searchValue) {
+    addNewStudentButton.innerText = `Add New Student: ${searchValue}`;
+    addNewStudentButton.onclick = () => {
+      const nameInput = document.getElementById("addname");
+      if (nameInput) {
+        nameInput.value = searchValue;
+      }
+    };
+  } else {
+    addNewStudentButton.innerText = "Add New Student";
+  }
+            });
+
+            updateTable(paginationData);
+            updatePagination(paginationData);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      });
+    </script>
+  </body>
+</html>

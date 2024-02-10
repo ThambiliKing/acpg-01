@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>System Portal</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://kit.fontawesome.com/7b71993087.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <center><h1>EMERGENCY SHUTDOWN SYSTEM</h1></center>
+    <div class="alert-system">
+      <div
+        class="alert alert-danger d-flex align-items-center justify-content-center m-0"
+        role="alert"
+      >
+        <i class="fa-solid fa-triangle-exclamation"></i>&nbsp;&nbsp;DANGER ZONE!
+        THIS WILL SHUTDOWN THE SYSTEM COMPLETELY!
+      </div>
+    </div>
+    <br />
+    <center>
+      <form id="systemForm">
+        <% if(data.system_off){ %>
+        <button
+          type="button"
+          class="btn btn-primary"
+          id="submitBtn"
+          data-system-off="false"
+          data-message-initial="Restart"
+          data-message-final="accesible"
+        >
+          Turn Power ON
+        </button>
+        <% } else{ %>
+        <button
+          type="button"
+          class="btn btn-primary"
+          id="submitBtn"
+          data-system-off="true"
+          data-message-initial="Shutdown"
+          data-message-final="inaccesible"
+        >
+          Turn Power OFF
+        </button>
+        <% } %>
+      </form>
+    </center>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .getElementById("submitBtn")
+          .addEventListener("click", function () {
+            const status = Boolean(this.getAttribute("data-system-off") === "true");
+                const initial = this.getAttribute("data-message-initial");
+                const final = this.getAttribute("data-message-final");
+            Swal.fire({
+              title: "Are You Sure?",
+              text: `Doing this will ${initial} the system!`,
+              icon: "warning",
+              confirmButtonText: `Yes, ${initial}!`,
+            }).then((result) => {
+              if (result.isConfirmed) {
+                console.log(status)
+                var formData = {
+                  system_off: status,
+                };
+
+                return fetch("/admin/power", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(formData),
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    Swal.fire({
+                      title: `System ${initial} Complete!`,
+                      text: `All Pages are now ${final}!`,
+                      icon: "success",
+                    });
+
+                    window.location.reload();
+                  })
+                  .catch((error) => {
+                    console.error("Error: " + error);
+                  });
+              }
+            });
+          });
+      });
+    </script>
+  </body>
+</html>
