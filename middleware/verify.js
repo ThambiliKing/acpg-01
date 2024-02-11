@@ -2,7 +2,7 @@ import Admin from "../models/admins.js";
 import jwt from "jsonwebtoken";
 import Blacklist from "../models/Blacklist.js";
 import PowerData from "../models/power.js";
-import config from "../config.json" assert { type: "json" };
+import config from "../config.js";
 
 export async function Verify(req, res, next) {
   const authHeader = req.headers["cookie"];
