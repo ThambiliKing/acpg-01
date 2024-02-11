@@ -6,7 +6,7 @@ import { Verify, VerifyType, VerifyPower, VerifySystem } from "../middleware/ver
 const router = express.Router();
 
 router.get("/", Verify, VerifySystem, (req, res) => {
-    fetch("http://localhost:3000/api/students", {
+    fetch("http://localhost/api/students", {
         method: "POST",
     }).then(response => {
         if (response.status === 200) {
@@ -26,7 +26,7 @@ router.get("/", Verify, VerifySystem, (req, res) => {
 });
 
 router.get("/dashboard", Verify, VerifyType, VerifySystem, (req, res) => {
-    fetch("http://localhost:3000/api/students", {
+    fetch("http://localhost/api/students", {
         method: "POST",
     }).then(response => {
         if (response.status === 200) {
