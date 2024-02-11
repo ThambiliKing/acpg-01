@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import config from "../config.json" assert { type: "json" };
+import config from "../config.js";
 
 const adminSchema = new mongoose.Schema(
   {
